@@ -1,0 +1,34 @@
+DATA is list of
+	STREAM
+		info
+			name
+			type
+			channel_count
+			channel_format
+			source_id
+			nominal_srate
+			version
+			created_at
+			uid
+			session_id
+			hostname
+			v4address
+			v4data_port
+			v4service_port
+			v6address
+			v6data_port
+			v6service_port
+			desc
+			stream_id
+			effective_srate
+		footer
+			info
+				first_timestamp
+				last_timestamp
+				sample_count
+				clock_offsets
+		time_series
+		time_stamps
+HEADER
+	info
+		version
