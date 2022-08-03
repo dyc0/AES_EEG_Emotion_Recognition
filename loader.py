@@ -4,6 +4,10 @@ import numpy as np
 
 data, header = pyxdf.load_xdf('xdfs\LAZAR.xdf')
 
+print(header['info']['version'])
+
+'''
+
 for stream in data:
     y = stream['time_series']
 
@@ -19,3 +23,4 @@ for stream in data:
         raise RuntimeError('Unknown stream format')
 
 plt.show()
+'''

@@ -4,7 +4,6 @@ import pyxdf
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 class Features:
 
     def __init__(self, data, index) -> None:
@@ -17,6 +16,10 @@ class Features:
         self.minimum = 0
         self.maximum = 0
         self.energy = 0
+
+    def artefact_removal(self):
+        pass
+
 
     def calculate_mean(self):
         self.mean = []
@@ -66,9 +69,6 @@ class EEGData:
         self.features = []
         for segment in self.segments:
             self.features.append(Features(self.intervals[segment.index], segment.index))
-        
-        for ftr in self.features:
-            print(ftr)
 
 
 
@@ -76,3 +76,5 @@ if __name__ == '__main__':
     dataframe = EEGData('xdfs\pesa.xdf', 'csvs\pesa.csv')
     dataframe.extract_data()
     dataframe.extract_features()
+
+    dataframe.features[0].artefact_removal()

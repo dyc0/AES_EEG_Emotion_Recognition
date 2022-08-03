@@ -1,7 +1,7 @@
 __pycache__/
-csvs/
 Include/
 Lib/
 Scripts/
 share/
-xdfs/
+
+pyvenv.cfg
