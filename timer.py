@@ -25,14 +25,11 @@ def loadTimes(xdfFilePath, csvFilePath,
     for name in video_names['Stimulus']:
         video_durations[name[0:-4]] = VideoFileClip(videopath + name).duration
 
-    #startTime = data[0]['time_stamps'][0]
-    #endTime = data[0]['time_stamps'][-1]
-        #As far as I can tell, this is in seconds.
-
     return len(data[0]['time_stamps']), video_indices, video_durations
 
     
 def calculateSegments(time, video_indices, video_durations, freq=250):
+    freq = int(freq)
     currentIndex = time - 30*freq
     intervals = []
 
