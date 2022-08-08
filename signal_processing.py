@@ -13,11 +13,25 @@ from sklearn import decomposition
 bands = {'delta': [0.5, 4], 'tehta': [4, 8], 'alpha': [8, 13], \
          'beta': [13, 30], 'gamma': [30, 50]}
 
+
+class Emotion:
+    def __init__(self, csv_evals=None, csv_evals_path=None) -> None:
+        if not csv_evals:
+            self.cf = pd.read_csv(csv_evals_path)
+        else:
+            self.cf = csv_evals
+    
+    def get_class(self, vidindex):
+        return self.cf[self.cf['ID'] == vidindex]['MARKER'].iloc[0]
+        
+
+
 class Segment:
 
-    def __init__(self, data, index, freq) -> None:
+    def __init__(self, data, index, freq, emotion: Emotion) -> None:
         self.data = data
         self.index = index
+        self.emotion = emotion.get_class(int(self.index))
         self.freq = freq
 
         ica = decomposition.FastICA(n_components=22, whiten='arbitrary-variance', random_state=97)
@@ -80,6 +94,28 @@ class Segment:
         for channel in range(self.data.shape[1]):
             for key in bands.keys():
                 array.extend(self.channel_band_stats[channel][key])
+        array.append(self.emotion)
+        return array
+    
+    def get_axis_names(self):
+        array = []
+        for i in range(self.filtered_data.shape[1]):
+            array.append("CHL_" + str(i) + "_MIN")
+        for i in range(self.filtered_data.shape[1]):
+            array.append("CHL_" + str(i) + "_MAX")
+        for i in range(self.filtered_data.shape[1]):
+            array.append("CHL_" + str(i) + "_MED")
+        for i in range(self.filtered_data.shape[1]):
+            array.append("CHL_" + str(i) + "_STD")
+        for i in range(self.filtered_data.shape[1]):
+            for key in bands.keys():
+                name = "CHL_" + str(i) + "_" + key + "_"
+                array.append(name + "MIN")
+                array.append(name + "MAX")
+                array.append(name + "MED")
+                array.append(name + "STD")
+                array.append(name + "POW")
+        array.append('EMOTION')
         return array
 
 
@@ -94,9 +130,11 @@ class Segment:
 
 class EEGData:
 
-    def __init__(self, xdfFilePath, csvFilePath,
+    def __init__(self, xdfFilePath, csvFilePath, emotion: Emotion,
               videopath='C:\\Users\\Duca\\OneDrive - student.etf.bg.ac.rs\\ETF\\SESTI SEMESTAR\\AES\\PROJEKAT\\VIDEO\\VIDEOS\\'):
         
+        self.emotion = emotion
+
         self.data, self.header = pyxdf.load_xdf(xdfFilePath)
         self.signal = self.data[0]['time_series']
         self.timestamps = self.data[0]['time_stamps']
@@ -120,7 +158,7 @@ class EEGData:
     def extract_segments(self):
         self.features = []
         for segment in self.segments:
-            self.features.append(Segment(self.intervals[segment.index], segment.index, self.freq))
+            self.features.append(Segment(self.intervals[segment.index], segment.index, self.freq, self.emotion))
 
 
 
@@ -129,12 +167,16 @@ class Features:
         self.features = pd.DataFrame()
         for feature in eeg_data.features:
             self.features[feature.index] = feature.get_features_flat()
+        self.features.set_axis(eeg_data.features[0].get_axis_names(), axis='index', inplace=True)
+        self.features = self.features.T   
+        
 
     def to_csv(self):
         self.features.to_csv('Features.csv')
 
 if __name__ == '__main__':
-    eeg = EEGData('xdfs\pesa.xdf', 'csvs\pesa.csv')
+    emo = Emotion(csv_evals_path='csvs\\video_info.csv')
+    eeg = EEGData('xdfs\pesa.xdf', 'csvs\pesa.csv', emo)
     eeg.extract_data()
     eeg.extract_segments()
     fea = Features(eeg)
